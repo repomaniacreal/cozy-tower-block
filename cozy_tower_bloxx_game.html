@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cozy Tower - Festival Edition</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka for bouncy cartoon headers, Plus Jakarta Sans for clean UI -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #2B1E3E 0%, #140E21 100%);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-cartoon {
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        /* Festive 3D Cartoon Text Strokes */
+        .title-stroke {
+            color: #FF756B;
+            -webkit-text-stroke: 3.5px #3D263B;
+            paint-order: stroke fill;
+            text-shadow: 0px 5px 0px #3D263B, 0px 10px 20px rgba(0,0,0,0.35);
+        }
+
+        .title-gold-stroke {
+            color: #FFD166;
+            -webkit-text-stroke: 3px #3D263B;
+            paint-order: stroke fill;
+            text-shadow: 0px 4px 0px #3D263B;
+        }
+
+        .subtitle-stroke {
+            color: #FFFDF9;
+            -webkit-text-stroke: 2.5px #3D263B;
+            paint-order: stroke fill;
+            text-shadow: 0px 3px 0px #3D263B;
+        }
+
+        /* Glossy 3D Pill Cards & Buttons */
+        .festive-card {
+            background: linear-gradient(180deg, #FFFDF9 0%, #FFF3E0 100%);
+            border: 3px solid #3D263B;
+            box-shadow: 0 5px 0 #3D263B, 0 8px 16px rgba(25, 14, 36, 0.25);
+        }
+
+        .festive-btn {
+            background: linear-gradient(180deg, #FFFFFF 0%, #FFE8CC 100%);
+            border: 3px solid #3D263B;
+            box-shadow: 0 4px 0 #3D263B;
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.1s ease;
+        }
+
+        .festive-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #3D263B;
+        }
+
+        .festive-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #3D263B;
+        }
+
+        .festive-btn-primary {
+            background: linear-gradient(180deg, #FF7B6B 0%, #FF5252 100%);
+            color: #FFFFFF;
+            border: 3.5px solid #3D263B;
+            box-shadow: 0 6px 0 #3D263B, 0 10px 20px rgba(255, 82, 82, 0.4);
+            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease;
+        }
+
+        .festive-btn-primary:hover {
+            background: linear-gradient(180deg, #FF8A7A 0%, #FF6161 100%);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 0 #3D263B, 0 14px 24px rgba(255, 82, 82, 0.5);
+        }
+
+        .festive-btn-primary:active {
+            transform: translateY(4px) scale(0.98);
+            box-shadow: 0 2px 0 #3D263B;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(-1deg); }
+            50% { transform: translateY(-7px) rotate(1deg); }
+        }
+
+        .animate-float {
+            animation: floatSlow 3.2s ease-in-out infinite;
+        }
+
+        @keyframes popBounce {
+            0% { transform: scale(0.7); opacity: 0; }
+            60% { transform: scale(1.12); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop {
+            animation: popBounce 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center w-full h-full">
+
+    <!-- Main Mobile-First Game Frame -->
+    <div id="game-wrapper" class="relative w-full h-full max-w-[490px] sm:h-[94vh] sm:max-h-[900px] sm:rounded-[34px] overflow-hidden shadow-2xl sm:border-[5px] sm:border-[#3D263B] bg-[#5BC0F8] flex flex-col">
+
+        <!-- Interactive Game Canvas -->
+        <canvas id="game-canvas" class="block w-full h-full cursor-pointer touch-none"></canvas>
+
+        <!-- TOP FESTIVE HUD -->
+        <header class="absolute top-0 left-0 right-0 p-3 sm:p-4 pointer-events-none flex flex-col gap-2 z-20">
+            <div class="flex items-center justify-between gap-2">
+                <!-- Score, Floors & Best Pill Card -->
+                <div class="festive-card rounded-2xl px-3.5 py-2 flex items-center gap-3 pointer-events-auto">
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xl drop-shadow-sm">🏢</span>
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-[#8C6578] leading-none">FLOORS</div>
+                            <div id="floor-display" class="font-cartoon text-xl sm:text-2xl font-extrabold text-[#3D263B] leading-tight">0</div>
+                        </div>
+                    </div>
+
+                    <div class="h-7 w-[2px] bg-[#E8D5C4] rounded-full"></div>
+
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-[#8C6578] leading-none">SCORE</div>
+                        <div id="score-display" class="font-cartoon text-xl sm:text-2xl font-extrabold text-[#FF5964] leading-tight">0</div>
+                    </div>
+
+                    <div class="h-7 w-[2px] bg-[#E8D5C4] rounded-full"></div>
+
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-[#8C6578] leading-none">BEST</div>
+                        <div id="best-display" class="font-cartoon text-lg sm:text-xl font-bold text-[#E09600] leading-tight">0</div>
+                    </div>
+                </div>
+
+                <!-- Right Controls: Lives + Sky Mood + Backsound -->
+                <div class="flex items-center gap-1.5 pointer-events-auto">
+                    <!-- Lives Pill -->
+                    <div id="lives-container" class="festive-card rounded-2xl px-2.5 py-2 flex items-center gap-1 text-base sm:text-lg" title="Remaining Lives">
+                        <span id="heart-1" class="transition-transform duration-300">❤️</span>
+                        <span id="heart-2" class="transition-transform duration-300">❤️</span>
+                        <span id="heart-3" class="transition-transform duration-300">❤️</span>
+                    </div>
+
+                    <!-- Festive Sky Mood Toggle -->
+                    <button id="btn-mood" class="festive-btn rounded-2xl w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-lg" title="Cycle Festival Sky Theme">
+                        <span id="mood-icon">🎡</span>
+                    </button>
+
+                    <!-- Backsound Audio Toggle -->
+                    <button id="btn-audio" class="festive-btn rounded-2xl w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center text-lg" title="Sound On">
+                        <span id="audio-icon">🔊</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Secondary Row: Sky Theme Badge, Height Pill, Combo Bar & Zen Mode -->
+            <div class="flex items-center justify-between px-0.5 flex-wrap gap-1.5">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                    <div id="mood-label" class="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-[#FFFDF9]/90 text-[#3D263B] border-2 border-[#3D263B] shadow-sm">
+                        🔄 Auto Sky
+                    </div>
+                    <!-- Height Pill -->
+                    <div id="height-pill" class="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-[#FFFDF9]/90 text-[#3D263B] border-2 border-[#3D263B] shadow-sm">
+                        🏗️ 0m
+                    </div>
+                    <!-- Dynamic Combo Badge -->
+                    <div id="combo-badge" class="hidden text-[11px] font-extrabold px-3 py-1 rounded-full bg-gradient-to-r from-[#FFD166] to-[#FF9F1C] text-[#3D263B] border-2 border-[#3D263B] shadow-sm">
+                        🔥 COMBO x2
+                    </div>
+                </div>
+
+                <button id="btn-zen-toggle" class="pointer-events-auto text-[11px] font-extrabold px-3 py-1 rounded-full bg-[#FFFDF9]/95 hover:bg-white text-[#3D263B] border-2 border-[#3D263B] shadow-sm transition active:scale-95" title="Toggle Unlimited Lives Zen Mode">
+                    ✨ ZEN MODE: OFF
+                </button>
+            </div>
+
+            <!-- Toast Notification for Sky / Mode Changes -->
+            <div id="toast-notification" class="self-center pointer-events-none opacity-0 transition-opacity duration-300 text-xs font-extrabold px-3.5 py-1.5 rounded-full bg-[#3D263B]/90 text-[#FFFDF9] border-2 border-[#FFD166] shadow-md">
+                🔄 Auto Sky Enabled
+            </div>
+        </header>
+
+        <!-- START OVERLAY -->
+        <div id="start-overlay" class="absolute inset-0 z-30 flex flex-col items-center justify-between p-5 sm:p-6 bg-black/15 backdrop-blur-[1.5px] transition-opacity duration-300">
+            <div class="mt-16 text-center animate-float">
+                <div class="inline-flex items-center gap-1.5 px-4 py-1 mb-2 rounded-full bg-[#FFF9E6] border-[2.5px] border-[#3D263B] text-xs font-extrabold uppercase tracking-wider text-[#3D263B] shadow-md">
+                    <span>🎪 FESTIVAL EDITION</span>
+                </div>
+                <h1 class="font-cartoon text-5xl sm:text-6xl font-extrabold title-stroke leading-none tracking-tight">
+                    COZY TOWER
+                </h1>
+                <p class="font-cartoon text-lg sm:text-xl font-bold title-gold-stroke mt-1 tracking-wide">
+                    FESTIVAL CITY BUILDER
+                </p>
+            </div>
+
+            <!-- Festive How-to-Play Card -->
+            <div class="festive-card rounded-3xl p-5 w-full max-w-xs text-center my-auto">
+                <div class="flex justify-center items-center gap-2.5 mb-2.5 text-2xl">
+                    <span>🎪</span><span>🏢</span><span>🎡</span><span>🎆</span>
+                </div>
+                <p class="text-xs sm:text-sm font-bold text-[#3D263B] leading-relaxed mb-3.5">
+                    Stack colorful boutique apartments amidst hot air balloons, a spinning Ferris wheel, and soothing lo-fi kalimba melodies.
+                </p>
+
+                <div class="flex flex-col gap-1.5 text-left text-[11px] bg-[#FFF8EB] p-3 rounded-2xl border-2 border-[#E6CEB3] mb-4">
+                    <div class="flex items-center gap-2 text-[#3D263B] font-extrabold">
+                        <span class="px-2 py-0.5 rounded-lg bg-[#FFE8CC] border border-[#3D263B]">🎨 6 Boutique Block Styles</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[#3D263B] font-extrabold">
+                        <span class="px-2 py-0.5 rounded-lg bg-[#FFE8CC] border border-[#3D263B]">🎆 Golden Penthouse & Fireworks</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-[#3D263B] font-extrabold">
+                        <span class="px-2 py-0.5 rounded-lg bg-[#FFE8CC] border border-[#3D263B]">🎵 Lo-Fi & Kalimba Audio</span>
+                    </div>
+                </div>
+
+                <button id="btn-start-game" class="festive-btn-primary font-cartoon text-xl font-extrabold w-full py-3.5 rounded-2xl tracking-wide flex items-center justify-center gap-2">
+                    <span>PLAY NOW</span> <span>🎉</span>
+                </button>
+
+                <p class="text-[11px] font-bold text-[#8C6578] mt-3 leading-snug">
+                    Tap screen, click mouse, or press <kbd class="px-1.5 py-0.5 bg-[#FFE8CC] border border-[#3D263B] rounded text-[10px] font-extrabold text-[#3D263B]">[SPACE]</kbd> to drop blocks
+                </p>
+            </div>
+
+            <!-- Reference Poster Style Banner at Bottom -->
+            <div class="text-center pb-1">
+                <p class="font-cartoon text-3xl font-extrabold title-stroke tracking-wide">EASY TO PLAY</p>
+                <p class="font-cartoon text-sm font-extrabold subtitle-stroke tracking-widest uppercase">INTENSE GAMEPLAY</p>
+            </div>
+        </div>
+
+        <!-- GAME OVER MODAL -->
+        <div id="gameover-overlay" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-black/45 backdrop-blur-sm">
+            <div class="festive-card rounded-3xl p-6 w-full max-w-xs text-center animate-pop">
+                <div class="inline-flex items-center gap-1 px-3 py-1 mb-2 rounded-full bg-[#FFF0D9] border-2 border-[#3D263B] text-[10px] font-extrabold uppercase tracking-wider text-[#3D263B]">
+                    🎪 FESTIVAL COMPLETE
+                </div>
+                <h2 class="font-cartoon text-3xl font-extrabold text-[#3D263B] mb-1">TOWER FINISHED!</h2>
+                <p id="gameover-subtitle" class="text-xs font-bold text-[#8C6578] mb-4">Your festival city skyline looks vibrant and cozy!</p>
+
+                <div class="grid grid-cols-2 gap-2.5 bg-[#FFF6E8] p-3.5 rounded-2xl border-2 border-[#E8D5C4] mb-5">
+                    <div>
+                        <div class="text-[10px] font-extrabold uppercase text-[#8C6578]">FINAL SCORE</div>
+                        <div id="final-score" class="font-cartoon text-2xl font-extrabold text-[#FF5964]">0</div>
+                    </div>
+                    <div class="border-l-2 border-[#E8D5C4]">
+                        <div class="text-[10px] font-extrabold uppercase text-[#8C6578]">BEST SCORE</div>
+                        <div id="final-best-score" class="font-cartoon text-2xl font-extrabold text-[#E09600]">0</div>
+                    </div>
+                    <div class="pt-2 border-t-2 border-[#E8D5C4]">
+                        <div class="text-[10px] font-extrabold uppercase text-[#8C6578]">FLOORS BUILT</div>
+                        <div id="final-floors" class="font-cartoon text-xl font-extrabold text-[#3D263B]">0</div>
+                    </div>
+                    <div class="pt-2 border-t-2 border-l-2 border-[#E8D5C4]">
+                        <div class="text-[10px] font-extrabold uppercase text-[#8C6578]">MAX COMBO</div>
+                        <div id="final-max-combo" class="font-cartoon text-xl font-extrabold text-[#9B5DE5]">x0</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2.5">
+                    <button id="btn-restart" class="festive-btn-primary font-cartoon text-lg font-extrabold w-full py-3 rounded-2xl">
+                        PLAY AGAIN 🎡
+                    </button>
+                    <button id="btn-switch-zen" class="festive-btn font-cartoon text-sm font-bold text-[#3D263B] w-full py-2.5 rounded-2xl">
+                        Try ✨ Zen Mode (Unlimited Lives ∞)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * ============================================================================
+         * 1. PROCEDURAL FESTIVE & COZY WEB AUDIO ENGINE (Backsound + Chime SFX)
+         * ============================================================================
+         * Generates a warm, cheerful Kalimba & Lo-Fi Electric Piano chord progression
+         * with celebratory wind-chime arpeggios and firework pops.
+         */
+        class CozyFestiveAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.isMuted = false;
+                this.isPlayingBgm = false;
+                this.bgmTimer = null;
+                this.chordIndex = 0;
+                this.stepIndex = 0;
+
+                // Uplifting, warm Major 7th / 9th festival chords
+                this.chords = [
+                    { root: 130.81, notes: [261.63, 329.63, 392.00, 493.88, 587.33] }, // Cmaj9
+                    { root: 110.00, notes: [220.00, 261.63, 329.63, 392.00, 493.88] }, // Am9
+                    { root: 174.61, notes: [261.63, 349.23, 440.00, 523.25, 659.25] }, // Fmaj7
+                    { root: 196.00, notes: [293.66, 392.00, 493.88, 587.33, 659.25] }  // G6/9
+                ];
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            toggleMute() {
+                this.init();
+                this.isMuted = !this.isMuted;
+                if (this.isMuted) {
+                    this.stopBgm();
+                } else {
+                    this.startBgm();
+                    this.playKalimbaNote(523.25, 0.08);
+                }
+                return this.isMuted;
+            }
+
+            startBgm() {
+                this.init();
+                if (this.isMuted || this.isPlayingBgm || !this.ctx) return;
+                this.isPlayingBgm = true;
+
+                this.playMusicStep();
+                this.bgmTimer = setInterval(() => {
+                    if (!this.isMuted && this.isPlayingBgm) {
+                        this.playMusicStep();
+                    }
+                }, 430);
+            }
+
+            stopBgm() {
+                this.isPlayingBgm = false;
+                if (this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
+                }
+            }
+
+            playMusicStep() {
+                if (!this.ctx || this.isMuted || this.ctx.state !== 'running') return;
+
+                const currentChord = this.chords[this.chordIndex];
+
+                // Step 0: Warm electric piano pad + gentle bass
+                if (this.stepIndex === 0) {
+                    this.playWarmPad(currentChord.root, 3.3, 0.032);
+                    currentChord.notes.slice(0, 3).forEach((freq) => {
+                        this.playWarmPad(freq, 3.1, 0.015);
+                    });
+                }
+
+                // Cheerful Kalimba melody plucks
+                if (this.stepIndex % 2 === 0 || Math.random() < 0.45) {
+                    const pool = currentChord.notes;
+                    const freq = pool[Math.floor(Math.random() * pool.length)];
+                    this.playKalimbaNote(freq, 0.038);
+                }
+
+                // Festive high music-box sparkle on off-beats
+                if (this.stepIndex === 3 || this.stepIndex === 7) {
+                    const pool = currentChord.notes;
+                    const sparkleFreq = pool[pool.length - 1] * (Math.random() > 0.4 ? 1 : 1.5);
+                    this.playKalimbaNote(sparkleFreq, 0.02);
+                }
+
+                this.stepIndex++;
+                if (this.stepIndex >= 8) {
+                    this.stepIndex = 0;
+                    this.chordIndex = (this.chordIndex + 1) % this.chords.length;
+                }
+            }
+
+            playWarmPad(freq, duration, maxGain = 0.02) {
+                if (!this.ctx || this.isMuted) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.linearRampToValueAtTime(maxGain, now + 0.35);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + duration + 0.05);
+            }
+
+            playKalimbaNote(freq, volume = 0.05) {
+                if (!this.ctx || this.isMuted) return;
+                const now = this.ctx.currentTime;
+
+                const osc = this.ctx.createOscillator();
+                const overtone = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, now);
+
+                overtone.type = 'triangle';
+                overtone.frequency.setValueAtTime(freq * 2, now);
+
+                const overtoneGain = this.ctx.createGain();
+                overtoneGain.gain.setValueAtTime(volume * 0.22, now);
+                overtoneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.16);
+
+                gain.gain.setValueAtTime(0.001, now);
+                gain.gain.linearRampToValueAtTime(volume, now + 0.012);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.15);
+
+                osc.connect(gain);
+                overtone.connect(overtoneGain);
+                overtoneGain.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                overtone.start(now);
+                osc.stop(now + 1.2);
+                overtone.stop(now + 1.2);
+            }
+
+            playDropRelease() {
+                if (!this.ctx || this.isMuted) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(360, now);
+                osc.frequency.exponentialRampToValueAtTime(175, now + 0.14);
+
+                gain.gain.setValueAtTime(0.055, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.16);
+            }
+
+            playBlockLand(isPerfect, combo = 1, isMilestone = false) {
+                if (!this.ctx || this.isMuted) return;
+                const now = this.ctx.currentTime;
+
+                // 1. Cozy wooden thud
+                const thudOsc = this.ctx.createOscillator();
+                const thudGain = this.ctx.createGain();
+                thudOsc.type = 'triangle';
+                thudOsc.frequency.setValueAtTime(150, now);
+                thudOsc.frequency.exponentialRampToValueAtTime(54, now + 0.14);
+
+                thudGain.gain.setValueAtTime(0.15, now);
+                thudGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+
+                thudOsc.connect(thudGain);
+                thudGain.connect(this.ctx.destination);
+                thudOsc.start(now);
+                thudOsc.stop(now + 0.16);
+
+                // 2. Melodic scale chime
+                const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00, 1046.50];
+                const note = scale[Math.min(combo, scale.length - 1)];
+                this.playKalimbaNote(note, 0.09);
+
+                // 3. Celebratory arpeggio on Perfect drop or Milestone floor
+                if (isPerfect || isMilestone) {
+                    const arp = isMilestone
+                        ? [523.25, 659.25, 783.99, 1046.50, 1318.51]
+                        : [523.25, 659.25, 783.99, 1046.50];
+                    arp.forEach((f, idx) => {
+                        setTimeout(() => {
+                            this.playKalimbaNote(f, 0.068);
+                        }, idx * 55);
+                    });
+                }
+            }
+
+            playBlockMiss() {
+                if (!this.ctx || this.isMuted) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.linearRampToValueAtTime(125, now + 0.32);
+
+                gain.gain.setValueAtTime(0.09, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.35);
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 2. FESTIVE GAME CONFIGURATION & STATE
+         * ============================================================================
+         */
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const audio = new CozyFestiveAudioEngine();
+
+        // UI Elements
+        const floorDisplay = document.getElementById('floor-display');
+        const scoreDisplay = document.getElementById('score-display');
+        const bestDisplay = document.getElementById('best-display');
+        const heightPill = document.getElementById('height-pill');
+        const comboBadge = document.getElementById('combo-badge');
+        const moodIcon = document.getElementById('mood-icon');
+        const moodLabel = document.getElementById('mood-label');
+        const audioBtn = document.getElementById('btn-audio');
+        const audioIcon = document.getElementById('audio-icon');
+        const zenToggleBtn = document.getElementById('btn-zen-toggle');
+        const toastEl = document.getElementById('toast-notification');
+        const startOverlay = document.getElementById('start-overlay');
+        const gameoverOverlay = document.getElementById('gameover-overlay');
+        const finalFloorsEl = document.getElementById('final-floors');
+        const finalScoreEl = document.getElementById('final-score');
+        const finalBestScoreEl = document.getElementById('final-best-score');
+        const finalMaxComboEl = document.getElementById('final-max-combo');
+
+        const STORAGE_KEY_SCORE = 'cozy_tower_bloxx_festive_best_score_v3';
+        let bestScore = parseInt(localStorage.getItem(STORAGE_KEY_SCORE) || '0', 10);
+        bestDisplay.textContent = bestScore;
+
+        // Festive Sky Themes (100% English)
+        const MOODS = [
+            { id: 'auto', name: '🔄 Auto Sky', icon: '🎡' },
+            { id: 'day', name: '☀️ Morning Carnival', icon: '☀️' },
+            { id: 'sunset', name: '🏮 Sunset Lanterns', icon: '🏮' },
+            { id: 'night', name: '🎆 Night Festival', icon: '🎆' }
+        ];
+        let currentMoodIndex = 0;
+        let toastTimeout = null;
+
+        function showToast(message) {
+            if (!toastEl) return;
+            toastEl.textContent = message;
+            toastEl.classList.remove('opacity-0');
+            toastEl.classList.add('opacity-100');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toastEl.classList.remove('opacity-100');
+                toastEl.classList.add('opacity-0');
+            }, 1800);
+        }
+
+        // Vibrant Boutique Apartment Palettes
+        const BLOCK_PALETTES = [
+            { name: 'Coral Fiesta', wall: '#FF6B5B', shade: '#D94B3D', ledge: '#FFF5EB', ledgeShade: '#E6D0BC', awning1: '#FF4757', awning2: '#FFFFFF', shutter: '#2EC4B6' },
+            { name: 'Sunny Mango', wall: '#FFB830', shade: '#DE930B', ledge: '#FFFDF7', ledgeShade: '#E8DAC0', awning1: '#FF5964', awning2: '#FFFDF7', shutter: '#35A7FF' },
+            { name: 'Mint Patisserie', wall: '#3EC1D3', shade: '#2499A9', ledge: '#FFF9F2', ledgeShade: '#DBD2C5', awning1: '#FF6B6B', awning2: '#FFFFFF', shutter: '#FFD166' },
+            { name: 'Berry Pop', wall: '#FF70A6', shade: '#D94C81', ledge: '#FFF5F9', ledgeShade: '#E5C5D2', awning1: '#FFD166', awning2: '#FFFFFF', shutter: '#4EA8DE' },
+            { name: 'Lavender Dream', wall: '#9B7EDE', shade: '#7658BA', ledge: '#FCF9FF', ledgeShade: '#D9CEEB', awning1: '#06D6A0', awning2: '#FFFFFF', shutter: '#FFBE0B' },
+            { name: 'Tangerine Zing', wall: '#FF8C42', shade: '#D96B26', ledge: '#FFF9F0', ledgeShade: '#E6D2BA', awning1: '#1982C4', awning2: '#FFFFFF', shutter: '#8AC926' }
+        ];
+
+        const FESTIVE_COLORS = ['#FF595E', '#FFCA3A', '#8AC926', '#1982C4', '#9B5DE5', '#F15BB5', '#00BBF9'];
+
+        // Dimensions & Block Metrics
+        let width = 480;
+        let height = 800;
+        let dpr = window.devicePixelRatio || 1;
+
+        let BLOCK_W = 108;
+        let BLOCK_H = 84;
+        let GROUND_Y = 660;
+
+        // Gameplay State
+        let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER'
+        let isZenMode = false;
+        let score = 0;
+        let floors = 0;
+        let lives = 3;
+        let combo = 0;
+        let maxCombo = 0;
+
+        // Camera & Tower Sway
+        let cameraY = 0;
+        let targetCameraY = 0;
+        let towerSwayTime = 0;
+        let towerImbalance = 0;
+
+        // Entities
+        let stack = [];
+        let activeBlock = null;
+        let fallingBlocks = [];
+        let particles = [];
+        let shockwaves = [];
+        let floatingTexts = [];
+        let clouds = [];
+        let birds = [];
+        let balloons = [];
+        let lanterns = [];
+        let fireworks = [];
+        let stars = [];
+        let fireflies = [];
+        let skylineBuildings = [];
+        let ferrisWheel = { x: 0, y: 0, r: 68, angle: 0 };
+
+        // Swinging Crane / Rope State
+        const crane = {
+            pivotX: 0,
+            pivotY: -25,
+            ropeLength: 145,
+            angle: 0,
+            maxAngle: 0.44,
+            speed: 0.026,
+            time: 0,
+            hasBlock: true
+        };
+
+        /**
+         * ============================================================================
+         * 3. CANVAS RESIZE & FESTIVE SCENERY INITIALIZATION
+         * ============================================================================
+         */
+        function resizeCanvas() {
+            const wrapper = document.getElementById('game-wrapper');
+            const rect = wrapper.getBoundingClientRect();
+            width = rect.width;
+            height = rect.height;
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+            canvas.width = width * dpr;
+            canvas.height = height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            BLOCK_W = Math.round(Math.min(116, Math.max(92, width * 0.245)));
+            BLOCK_H = Math.round(BLOCK_W * 0.77);
+            GROUND_Y = height * 0.80;
+
+            crane.pivotX = width * 0.5;
+            crane.ropeLength = Math.max(125, height * 0.175);
+
+            if (stack.length > 0) {
+                const dxCenter = (width * 0.5) - stack[0].x;
+                stack.forEach(b => b.x += dxCenter);
+            }
+
+            initFestiveBackground();
+        }
+
+        function initFestiveBackground() {
+            // Giant Ferris Wheel on the horizon
+            ferrisWheel = {
+                x: width * 0.22,
+                y: GROUND_Y - 122,
+                r: Math.min(72, width * 0.165),
+                angle: 0
+            };
+
+            // Colorful City Skyline with roofs & lit windows
+            skylineBuildings = [];
+            const layers = [
+                { count: 8, minW: 54, maxW: 90, minH: 135, maxH: 280, parallax: 0.11 },
+                { count: 9, minW: 46, maxW: 78, minH: 75, maxH: 180, parallax: 0.22 }
+            ];
+
+            const roofTypes = ['gable', 'dome', 'flat', 'spire'];
+            layers.forEach((layer, lIdx) => {
+                let curX = -20;
+                for (let i = 0; i < layer.count; i++) {
+                    const bw = layer.minW + Math.random() * (layer.maxW - layer.minW);
+                    const bh = layer.minH + Math.random() * (layer.maxH - layer.minH);
+                    const roof = roofTypes[(i + lIdx) % roofTypes.length];
+                    const winRows = Math.floor(bh / 30);
+                    const winCols = Math.max(2, Math.floor(bw / 22));
+
+                    skylineBuildings.push({
+                        layer: lIdx,
+                        x: curX,
+                        w: bw,
+                        h: bh,
+                        roof,
+                        winRows,
+                        winCols,
+                        parallax: layer.parallax,
+                        pastelIdx: (i + lIdx) % 4
+                    });
+                    curX += bw - (6 + Math.random() * 10);
+                }
+            });
+
+            // Fluffy Moving Clouds
+            clouds = [];
+            for (let i = 0; i < 6; i++) {
+                clouds.push({
+                    x: Math.random() * width,
+                    y: 55 + Math.random() * (height * 0.42),
+                    r: 22 + Math.random() * 20,
+                    speed: 0.15 + Math.random() * 0.18,
+                    alpha: 0.55 + Math.random() * 0.3
+                });
+            }
+
+            // Flying Birds (Burung Terbang)
+            birds = [];
+            for (let i = 0; i < 5; i++) {
+                birds.push({
+                    x: Math.random() * width,
+                    y: 90 + Math.random() * (height * 0.35),
+                    vx: 0.45 + Math.random() * 0.35,
+                    wingPhase: Math.random() * Math.PI * 2,
+                    size: 5 + Math.random() * 3
+                });
+            }
+
+            // Hot Air Balloons (Balon Udara Warna-Warni)
+            const balloonPalettes = [
+                ['#FF595E', '#FFCA3A', '#FFFFFF'],
+                ['#1982C4', '#8AC926', '#FFFDF5'],
+                ['#F15BB5', '#00BBF9', '#FEE440'],
+                ['#9B5DE5', '#FF924C', '#FFFFFF']
+            ];
+            balloons = [];
+            for (let i = 0; i < 4; i++) {
+                balloons.push({
+                    x: (width / 4) * i + 25 + Math.random() * 40,
+                    y: 85 + Math.random() * (height * 0.40),
+                    r: 19 + Math.random() * 11,
+                    vx: 0.11 + Math.random() * 0.14,
+                    bobPhase: Math.random() * Math.PI * 2,
+                    colors: balloonPalettes[i % balloonPalettes.length],
+                    parallax: 0.14 + Math.random() * 0.14
+                });
+            }
+
+            // Floating Glowing Sky Lanterns (Lampion Terbang)
+            lanterns = [];
+            for (let i = 0; i < 14; i++) {
+                lanterns.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vy: 0.25 + Math.random() * 0.3,
+                    swayPhase: Math.random() * Math.PI * 2,
+                    size: 7 + Math.random() * 5
+                });
+            }
+
+            // Twinkling Stars
+            stars = [];
+            for (let i = 0; i < 50; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * (height * 0.65),
+                    size: 1.1 + Math.random() * 2.2,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Cozy Fireflies
+            fireflies = [];
+            for (let i = 0; i < 16; i++) {
+                fireflies.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: -0.2 - Math.random() * 0.25,
+                    phase: Math.random() * Math.PI * 2
+                });
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 4. FESTIVE BOUTIQUE BLOCK GENERATOR & GAMEPLAY LOGIC
+         * ============================================================================
+         */
+        function createBlockData(index, x, y) {
+            const isMilestone = index > 0 && index % 5 === 0;
+            const palette = isMilestone
+                ? {
+                    name: 'Golden Penthouse',
+                    wall: '#FFD166',
+                    shade: '#E09F1F',
+                    ledge: '#FFFDF5',
+                    ledgeShade: '#E6CE8A',
+                    awning1: '#EF476F',
+                    awning2: '#FFFDF5',
+                    shutter: '#118AB2'
+                }
+                : BLOCK_PALETTES[index % BLOCK_PALETTES.length];
+
+            const windowLayout = isMilestone
+                ? 'panoramic'
+                : ['double_cafe', 'arched_boutique', 'balcony_suite', 'cozy_studio'][index % 4];
+
+            const hasAwning = isMilestone || index % 2 === 0;
+            const hasFlowerBox = index % 3 !== 1;
+            const hasBunting = isMilestone || index % 2 === 1;
+            const hasFairyLights = isMilestone || index % 3 === 0;
+
+            return {
+                index,
+                x,
+                y,
+                w: BLOCK_W,
+                h: BLOCK_H,
+                isMilestone,
+                palette,
+                windowLayout,
+                hasAwning,
+                hasFlowerBox,
+                hasBunting,
+                hasFairyLights,
+                flowerColors: [
+                    FESTIVE_COLORS[index % FESTIVE_COLORS.length],
+                    FESTIVE_COLORS[(index + 2) % FESTIVE_COLORS.length],
+                    FESTIVE_COLORS[(index + 4) % FESTIVE_COLORS.length]
+                ],
+                glowIntensity: isMilestone ? 0.6 : 0,
+                landScaleY: 1,
+                offsetFromPrev: 0
+            };
+        }
+
+        function resetGame() {
+            score = 0;
+            floors = 0;
+            lives = 3;
+            combo = 0;
+            maxCombo = 0;
+            cameraY = 0;
+            targetCameraY = 0;
+            towerImbalance = 0;
+            fallingBlocks = [];
+            particles = [];
+            shockwaves = [];
+            floatingTexts = [];
+            fireworks = [];
+
+            stack = [];
+            const startCenterX = width * 0.5;
+            const baseBlock = createBlockData(0, startCenterX, GROUND_Y - BLOCK_H * 0.5);
+            stack.push(baseBlock);
+
+            updateHUD();
+            spawnSwingingBlock();
+        }
+
+        function spawnSwingingBlock() {
+            const nextIndex = stack.length;
+            crane.hasBlock = true;
+            crane.speed = Math.min(0.044, 0.025 + floors * 0.00055);
+            crane.maxAngle = Math.min(0.54, 0.38 + floors * 0.004);
+
+            const hookPos = getCraneHookPosition();
+            activeBlock = {
+                ...createBlockData(nextIndex, hookPos.x, hookPos.y + BLOCK_H * 0.5 - cameraY),
+                state: 'SWINGING',
+                vx: 0,
+                vy: 0,
+                rotation: 0,
+                vr: 0
+            };
+        }
+
+        function getCraneHookPosition() {
+            const hookX = crane.pivotX + Math.sin(crane.angle) * crane.ropeLength;
+            const hookY = crane.pivotY + Math.cos(crane.angle) * crane.ropeLength;
+            return { x: hookX, y: hookY };
+        }
+
+        function dropActiveBlock() {
+            if (gameState !== 'PLAYING') return;
+            if (!activeBlock || activeBlock.state !== 'SWINGING') return;
+
+            audio.init();
+            audio.playDropRelease();
+
+            const hookPos = getCraneHookPosition();
+            activeBlock.state = 'FALLING';
+            activeBlock.x = hookPos.x;
+            activeBlock.y = (hookPos.y + 18 + BLOCK_H * 0.5) - cameraY;
+
+            const angularVel = Math.cos(crane.time) * crane.speed * crane.maxAngle;
+            activeBlock.vx = angularVel * crane.ropeLength * 0.32;
+            activeBlock.vy = 2.4;
+            activeBlock.rotation = -crane.angle * 0.45;
+            activeBlock.vr = - activeBlock.rotation * 0.08;
+            crane.hasBlock = false;
+        }
+
+        /**
+         * ============================================================================
+         * 5. PHYSICS, COLLISIONS & FESTIVE CELEBRATIONS
+         * ============================================================================
+         */
+        function updatePhysics() {
+            towerSwayTime += 0.024;
+            ferrisWheel.angle += 0.0045;
+
+            // 1. Update Crane Pendulum
+            crane.time += crane.speed;
+            crane.angle = Math.sin(crane.time) * crane.maxAngle;
+
+            // 2. Smooth Camera Lerp
+            cameraY += (targetCameraY - cameraY) * 0.085;
+
+            // 3. Calculate Current Tower Sway
+            const swayAmplitude = Math.min(22, (stack.length - 1) * 0.55 + Math.abs(towerImbalance) * 0.18);
+            const currentTowerSwayX = Math.sin(towerSwayTime) * swayAmplitude;
+
+            // 4. Update Active Block
+            if (activeBlock) {
+                if (activeBlock.state === 'SWINGING') {
+                    const hookPos = getCraneHookPosition();
+                    activeBlock.x = hookPos.x;
+                    activeBlock.y = (hookPos.y + 18 + BLOCK_H * 0.5) - cameraY;
+                    activeBlock.rotation = -crane.angle * 0.65;
+                } else if (activeBlock.state === 'FALLING') {
+                    activeBlock.vy += 0.58; // Gravity
+                    activeBlock.x += activeBlock.vx;
+                    activeBlock.y += activeBlock.vy;
+                    activeBlock.rotation *= 0.91;
+
+                    const topBlock = stack[stack.length - 1];
+                    const topSwayRatio = (stack.length - 1) / Math.max(1, stack.length);
+                    const topBlockActualX = topBlock.x + currentTowerSwayX * topSwayRatio;
+                    const targetLandY = topBlock.y - BLOCK_H;
+
+                    // Landing check
+                    if (activeBlock.y >= targetLandY && activeBlock.y - activeBlock.vy <= targetLandY + 26) {
+                        const dx = activeBlock.x - topBlockActualX;
+                        const absDx = Math.abs(dx);
+                        const maxAllowedOffset = BLOCK_W * 0.54;
+                        const perfectThreshold = BLOCK_W * 0.11;
+
+                        if (absDx <= maxAllowedOffset) {
+                            let finalDx = dx;
+                            let isPerfect = false;
+
+                            if (absDx <= perfectThreshold) {
+                                finalDx = 0;
+                                isPerfect = true;
+                                combo++;
+                                if (combo > maxCombo) maxCombo = combo;
+                            } else {
+                                combo = 0;
+                            }
+
+                            towerImbalance = Math.max(-45, Math.min(45, towerImbalance + finalDx * 0.35));
+
+                            const landedBlock = {
+                                ...activeBlock,
+                                x: topBlock.x + finalDx,
+                                y: targetLandY,
+                                rotation: 0,
+                                glowIntensity: isPerfect || activeBlock.isMilestone ? 1.0 : 0.35,
+                                landScaleY: 0.82,
+                                offsetFromPrev: finalDx
+                            };
+
+                            stack.push(landedBlock);
+                            activeBlock = null;
+
+                            // Update Score & Floors
+                            floors++;
+                            const milestoneBonus = landedBlock.isMilestone ? 100 : 0;
+                            const basePoints = isPerfect ? 25 * Math.max(1, combo) : 10;
+                            const pointsEarned = basePoints + milestoneBonus;
+                            score += pointsEarned;
+
+                            if (score > bestScore) {
+                                bestScore = score;
+                                localStorage.setItem(STORAGE_KEY_SCORE, bestScore);
+                            }
+
+                            // Audio & Celebratory Visuals
+                            audio.playBlockLand(isPerfect, combo, landedBlock.isMilestone);
+                            spawnFestiveConfetti(topBlockActualX + finalDx, targetLandY + BLOCK_H * 0.5, isPerfect || landedBlock.isMilestone);
+
+                            if (isPerfect || landedBlock.isMilestone) {
+                                shockwaves.push({
+                                    x: topBlockActualX + finalDx,
+                                    y: targetLandY + BLOCK_H * 0.5,
+                                    r: BLOCK_W * 0.38,
+                                    maxR: BLOCK_W * 1.4,
+                                    alpha: 0.95,
+                                    color: landedBlock.isMilestone ? '#FFD166' : '#FF70A6'
+                                });
+                            }
+
+                            if (landedBlock.isMilestone) {
+                                addFloatingText(topBlockActualX, targetLandY - 24, `👑 GOLDEN PENTHOUSE! +100`, '#FFD166');
+                                spawnBackgroundFirework(width * 0.25, height * 0.26);
+                                spawnBackgroundFirework(width * 0.75, height * 0.24);
+                            } else if (isPerfect) {
+                                let label = `PERFECT! ✨ (+${pointsEarned})`;
+                                if (combo >= 3) {
+                                    label = `COMBO x${combo}! 🔥 (+${pointsEarned})`;
+                                } else if (combo === 2) {
+                                    label = `SUPER PERFECT! 🌟 (+${pointsEarned})`;
+                                }
+                                addFloatingText(topBlockActualX, targetLandY - 16, label, '#FFE066');
+                            } else {
+                                const goodCallouts = [`NICE! (+${pointsEarned})`, `GREAT! (+${pointsEarned})`];
+                                const callout = goodCallouts[floors % goodCallouts.length];
+                                addFloatingText(topBlockActualX + finalDx, targetLandY - 10, callout, '#FFFFFF');
+                            }
+
+                            if (stack.length > 3) {
+                                targetCameraY = (stack.length - 3) * BLOCK_H;
+                            }
+
+                            updateHUD();
+                            setTimeout(() => {
+                                if (gameState === 'PLAYING') spawnSwingingBlock();
+                            }, 210);
+
+                        } else {
+                            // Too far off edge -> Tumble off!
+                            combo = 0;
+                            audio.playBlockMiss();
+                            activeBlock.vx = (dx > 0 ? 1 : -1) * (2.6 + Math.random() * 1.5);
+                            activeBlock.vy = -2.2;
+                            activeBlock.vr = (dx > 0 ? 1 : -1) * 0.085;
+                            fallingBlocks.push(activeBlock);
+                            activeBlock = null;
+                            handleMissedBlock();
+                        }
+                    } else if (activeBlock.y - cameraY > height + 110) {
+                        combo = 0;
+                        audio.playBlockMiss();
+                        activeBlock = null;
+                        handleMissedBlock();
+                    }
+                }
+            }
+
+            // 5. Update Tumbling Missed Blocks
+            for (let i = fallingBlocks.length - 1; i >= 0; i--) {
+                const fb = fallingBlocks[i];
+                fb.vy += 0.55;
+                fb.x += fb.vx;
+                fb.y += fb.vy;
+                fb.rotation += fb.vr;
+                if (fb.y - cameraY > height + 200) {
+                    fallingBlocks.splice(i, 1);
+                }
+            }
+
+            // 6. Animate Stacked Blocks Squash-and-Stretch & Glow
+            stack.forEach(b => {
+                if (b.glowIntensity > 0) {
+                    b.glowIntensity = Math.max(0, b.glowIntensity - 0.025);
+                }
+                if (b.landScaleY < 1) {
+                    b.landScaleY = Math.min(1, b.landScaleY + 0.045);
+                }
+            });
+
+            // 7. Update Confetti Particles, Shockwaves, Fireworks & Floating Texts
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += p.gravity || 0.1;
+                p.rotation = (p.rotation || 0) + (p.vr || 0);
+                p.alpha -= p.decay;
+                if (p.alpha <= 0) particles.splice(i, 1);
+            }
+
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i];
+                sw.r += (sw.maxR - sw.r) * 0.16;
+                sw.alpha -= 0.042;
+                if (sw.alpha <= 0) shockwaves.splice(i, 1);
+            }
+
+            for (let i = fireworks.length - 1; i >= 0; i--) {
+                const fw = fireworks[i];
+                fw.x += fw.vx;
+                fw.y += fw.vy;
+                fw.vy += 0.028;
+                fw.alpha -= 0.018;
+                if (fw.alpha <= 0) fireworks.splice(i, 1);
+            }
+
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i];
+                ft.y -= 1.25;
+                ft.alpha -= 0.02;
+                if (ft.alpha <= 0) floatingTexts.splice(i, 1);
+            }
+        }
+
+        function handleMissedBlock() {
+            if (!isZenMode) {
+                lives--;
+                updateHUD();
+                if (lives <= 0) {
+                    triggerGameOver();
+                    return;
+                }
+            } else {
+                updateHUD();
+            }
+
+            const missCallout = Math.random() > 0.5 ? 'OOPS! 💨' : 'MISSED!';
+            addFloatingText(width * 0.5, (stack[stack.length - 1]?.y || GROUND_Y) - 40, missCallout, '#FFADAD');
+            setTimeout(() => {
+                if (gameState === 'PLAYING') spawnSwingingBlock();
+            }, 380);
+        }
+
+        function spawnFestiveConfetti(x, y, isBigCelebration) {
+            const count = isBigCelebration ? 32 : 14;
+            for (let i = 0; i < count; i++) {
+                const side = i % 2 === 0 ? -1 : 1;
+                const color = FESTIVE_COLORS[i % FESTIVE_COLORS.length];
+                particles.push({
+                    x: x + (Math.random() - 0.5) * BLOCK_W * 0.85,
+                    y: y,
+                    vx: side * (1.2 + Math.random() * 4.0),
+                    vy: -2.2 - Math.random() * 4.0,
+                    r: isBigCelebration ? 4.2 + Math.random() * 3.5 : 3.2 + Math.random() * 2.5,
+                    color: color,
+                    shape: i % 3 === 0 ? 'star' : (i % 2 === 0 ? 'ribbon' : 'confetti'),
+                    rotation: Math.random() * Math.PI * 2,
+                    vr: (Math.random() - 0.5) * 0.28,
+                    alpha: 1,
+                    decay: 0.02 + Math.random() * 0.014,
+                    gravity: 0.09
+                });
+            }
+        }
+
+        function spawnBackgroundFirework(cx, cy) {
+            const color = FESTIVE_COLORS[Math.floor(Math.random() * FESTIVE_COLORS.length)];
+            const sparks = 24;
+            for (let i = 0; i < sparks; i++) {
+                const angle = (Math.PI * 2 * i) / sparks;
+                const speed = 1.2 + Math.random() * 2.0;
+                fireworks.push({
+                    x: cx,
+                    y: cy,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color,
+                    alpha: 1,
+                    r: 2.5 + Math.random() * 1.8
+                });
+            }
+        }
+
+        function addFloatingText(x, y, text, color) {
+            floatingTexts.push({ x, y, text, color, alpha: 1.0 });
+        }
+
+        /**
+         * ============================================================================
+         * 6. FESTIVE RENDERING ENGINE (Vibrant Sky, Ferris Wheel, Balloons & Blocks)
+         * ============================================================================
+         */
+        function getSkyColors() {
+            const moodId = MOODS[currentMoodIndex].id;
+            let progress = 0; // 0 = Carnival Day, 1 = Lantern Sunset, 2 = Festival Night
+
+            if (moodId === 'day') progress = 0;
+            else if (moodId === 'sunset') progress = 1;
+            else if (moodId === 'night') progress = 2;
+            else {
+                progress = Math.min(2, floors / 12);
+            }
+
+            const palettes = [
+                // 0: Carnival Day
+                {
+                    top: [40, 180, 255],
+                    mid: [125, 222, 255],
+                    bottom: [255, 244, 214],
+                    cityBack: '#6EC3E8',
+                    cityFront: '#4FA3CC',
+                    nightFactor: 0,
+                    sunsetFactor: 0
+                },
+                // 1: Lantern Sunset
+                {
+                    top: [142, 68, 173],
+                    mid: [255, 110, 110],
+                    bottom: [255, 214, 130],
+                    cityBack: '#8E5485',
+                    cityFront: '#5E3563',
+                    nightFactor: 0.55,
+                    sunsetFactor: 1.0
+                },
+                // 2: Starry Festival Night
+                {
+                    top: [20, 24, 66],
+                    mid: [46, 52, 112],
+                    bottom: [92, 75, 145],
+                    cityBack: '#2A2C5E',
+                    cityFront: '#1B1C42',
+                    nightFactor: 1.0,
+                    sunsetFactor: 0.35
+                }
+            ];
+
+            if (progress <= 1) {
+                return interpolatePalette(palettes[0], palettes[1], progress);
+            } else {
+                return interpolatePalette(palettes[1], palettes[2], progress - 1);
+            }
+        }
+
+        function interpolatePalette(p1, p2, t) {
+            const lerp = (a, b) => Math.round(a + (b - a) * t);
+            return {
+                top: `rgb(${lerp(p1.top[0], p2.top[0])}, ${lerp(p1.top[1], p2.top[1])}, ${lerp(p1.top[2], p2.top[2])})`,
+                mid: `rgb(${lerp(p1.mid[0], p2.mid[0])}, ${lerp(p1.mid[1], p2.mid[1])}, ${lerp(p1.mid[2], p2.mid[2])})`,
+                bottom: `rgb(${lerp(p1.bottom[0], p2.bottom[0])}, ${lerp(p1.bottom[1], p2.bottom[1])}, ${lerp(p1.bottom[2], p2.bottom[2])})`,
+                cityBack: t < 0.5 ? p1.cityBack : p2.cityBack,
+                cityFront: t < 0.5 ? p1.cityFront : p2.cityFront,
+                nightFactor: p1.nightFactor + (p2.nightFactor - p1.nightFactor) * t,
+                sunsetFactor: p1.sunsetFactor + (p2.sunsetFactor - p1.sunsetFactor) * t
+            };
+        }
+
+        function drawScene() {
+            const sky = getSkyColors();
+
+            // 1. Vibrant 3-Stop Sky Gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, height);
+            grad.addColorStop(0, sky.top);
+            grad.addColorStop(0.58, sky.mid);
+            grad.addColorStop(1, sky.bottom);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // 2. Cheerful Sun / Glowing Crescent Moon
+            drawCelestialBody(sky);
+
+            // 3. Twinkling Stars & Gentle Background Fireworks (Sunset/Night)
+            if (sky.nightFactor > 0.15) {
+                ctx.save();
+                stars.forEach(s => {
+                    const twinkle = 0.35 + 0.65 * Math.sin(Date.now() * 0.004 + s.phase);
+                    ctx.fillStyle = `rgba(255, 250, 224, ${sky.nightFactor * twinkle * 0.92})`;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+
+                if (sky.nightFactor > 0.65 && Math.random() < 0.014) {
+                    spawnBackgroundFirework(45 + Math.random() * (width - 90), 80 + Math.random() * (height * 0.34));
+                }
+            }
+
+            // Render Background Fireworks
+            fireworks.forEach(fw => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, fw.alpha);
+                ctx.fillStyle = fw.color;
+                ctx.shadowColor = fw.color;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(fw.x, fw.y, fw.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            });
+
+            // 4. Fluffy Moving Clouds & Flying Birds
+            ctx.save();
+            clouds.forEach(c => {
+                c.x += c.speed;
+                if (c.x - c.r * 2.5 > width) c.x = -c.r * 2.5;
+                const cloudY = c.y + cameraY * 0.08;
+                if (cloudY < height + 60) {
+                    ctx.fillStyle = `rgba(255, 255, 255, ${c.alpha * (1 - sky.nightFactor * 0.55)})`;
+                    ctx.beginPath();
+                    ctx.arc(c.x, cloudY, c.r, 0, Math.PI * 2);
+                    ctx.arc(c.x + c.r * 0.78, cloudY + 4, c.r * 0.82, 0, Math.PI * 2);
+                    ctx.arc(c.x - c.r * 0.78, cloudY + 5, c.r * 0.74, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            if (sky.nightFactor < 0.75) {
+                ctx.strokeStyle = `rgba(61, 38, 59, ${0.45 * (1 - sky.nightFactor)})`;
+                ctx.lineWidth = 2;
+                ctx.lineCap = 'round';
+                birds.forEach(b => {
+                    b.x += b.vx;
+                    b.wingPhase += 0.14;
+                    if (b.x > width + 30) b.x = -30;
+                    const by = b.y + Math.sin(b.wingPhase * 0.5) * 4 + cameraY * 0.1;
+                    const wingY = Math.sin(b.wingPhase) * 4;
+                    if (by < height) {
+                        ctx.beginPath();
+                        ctx.moveTo(b.x - b.size, by - wingY);
+                        ctx.quadraticCurveTo(b.x - b.size * 0.4, by - 3, b.x, by);
+                        ctx.quadraticCurveTo(b.x + b.size * 0.4, by - 3, b.x + b.size, by - wingY);
+                        ctx.stroke();
+                    }
+                });
+            }
+            ctx.restore();
+
+            // 5. Colorful Floating Hot Air Balloons
+            drawHotAirBalloons(sky);
+
+            // 6. Floating Glowing Sky Lanterns (Sunset & Night)
+            if (sky.sunsetFactor > 0.2 || sky.nightFactor > 0.3) {
+                drawSkyLanterns(Math.max(sky.sunsetFactor, sky.nightFactor));
+            }
+
+            // 7. Festive Town Skyline & Rotating Giant Ferris Wheel
+            drawFestiveSkylineAndFerrisWheel(sky);
+
+            // 8. Draw Stacked Apartment Tower (World Coordinates)
+            ctx.save();
+            ctx.translate(0, cameraY);
+
+            const swayAmplitude = Math.min(22, (stack.length - 1) * 0.55 + Math.abs(towerImbalance) * 0.18);
+            const currentTowerSwayX = Math.sin(towerSwayTime) * swayAmplitude;
+
+            stack.forEach((block, idx) => {
+                const heightRatio = idx / Math.max(1, stack.length);
+                const swayX = idx === 0 ? 0 : currentTowerSwayX * heightRatio;
+                const swayRot = idx === 0 ? 0 : (currentTowerSwayX * 0.0016) * heightRatio;
+
+                if (block.y + cameraY > -160 && block.y + cameraY < height + 160) {
+                    drawApartmentBlock(
+                        block.x + swayX,
+                        block.y,
+                        block.w,
+                        block.h,
+                        swayRot,
+                        block,
+                        sky.nightFactor
+                    );
+                }
+            });
+
+            // 9. Draw Tumbling Missed Blocks
+            fallingBlocks.forEach(fb => {
+                drawApartmentBlock(fb.x, fb.y, fb.w, fb.h, fb.rotation, fb, sky.nightFactor);
+            });
+
+            // 10. Draw Active Falling Block
+            if (activeBlock && activeBlock.state === 'FALLING') {
+                drawApartmentBlock(
+                    activeBlock.x,
+                    activeBlock.y,
+                    activeBlock.w,
+                    activeBlock.h,
+                    activeBlock.rotation,
+                    activeBlock,
+                    sky.nightFactor
+                );
+            }
+
+            // 11. Draw Festive Ground Plaza Foundation
+            drawGroundFoundation(sky.nightFactor);
+
+            // 12. Draw Shockwave Rings, Confetti Particles & Floating Popups
+            shockwaves.forEach(sw => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, sw.alpha);
+                ctx.strokeStyle = sw.color;
+                ctx.lineWidth = 3.5;
+                ctx.beginPath();
+                ctx.ellipse(sw.x, sw.y, sw.r, sw.r * 0.35, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, p.alpha);
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rotation || 0);
+                ctx.fillStyle = p.color;
+                if (p.shape === 'star') {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.r, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (p.shape === 'ribbon') {
+                    ctx.fillRect(-p.r * 1.4, -p.r * 0.45, p.r * 2.8, p.r * 0.9);
+                } else {
+                    ctx.fillRect(-p.r, -p.r * 0.65, p.r * 2, p.r * 1.3);
+                }
+                ctx.restore();
+            });
+
+            floatingTexts.forEach(ft => {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, ft.alpha);
+                ctx.font = '800 21px "Fredoka", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.lineWidth = 4.5;
+                ctx.strokeStyle = '#3D263B';
+                ctx.strokeText(ft.text, ft.x, ft.y);
+                ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+                ctx.restore();
+            });
+
+            ctx.restore(); // End cameraY transform
+
+            // 13. Draw Swinging Crane Rope, Festive Bunting & Yellow-Orange Pulley
+            drawCraneAndSwingingBlock(sky.nightFactor);
+
+            // 14. Draw Cozy Fireflies at Sunset/Night
+            if (sky.nightFactor > 0.25) {
+                ctx.save();
+                fireflies.forEach(ff => {
+                    ff.x += ff.vx;
+                    ff.y += ff.vy;
+                    ff.phase += 0.05;
+                    if (ff.y < 0) ff.y = height;
+                    if (ff.x < 0) ff.x = width;
+                    if (ff.x > width) ff.x = 0;
+
+                    const glow = 0.35 + 0.65 * Math.sin(ff.phase);
+                    ctx.fillStyle = `rgba(255, 235, 130, ${glow * sky.nightFactor})`;
+                    ctx.shadowColor = '#FFD54F';
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.arc(ff.x, ff.y, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.restore();
+            }
+        }
+
+        function drawCelestialBody(sky) {
+            ctx.save();
+            const cx = width * 0.82;
+            const cy = height * 0.17 + cameraY * 0.04;
+
+            if (sky.nightFactor < 0.65) {
+                // Warm Cheerful Sun with Halo Rings
+                const sunAlpha = Math.max(0, 1 - sky.nightFactor * 1.35);
+                ctx.fillStyle = `rgba(255, 245, 190, ${0.18 * sunAlpha})`;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 56, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = `rgba(255, 236, 153, ${0.32 * sunAlpha})`;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 40, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = `rgba(255, 248, 214, ${0.9 * sunAlpha})`;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Glowing Soft Moon at Night
+                const moonAlpha = (sky.nightFactor - 0.5) * 2;
+                ctx.fillStyle = `rgba(255, 249, 219, ${0.22 * moonAlpha})`;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 42, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = `rgba(255, 252, 230, ${0.92 * moonAlpha})`;
+                ctx.beginPath();
+                ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function drawHotAirBalloons(sky) {
+            ctx.save();
+            const fade = Math.max(0.25, 1 - sky.nightFactor * 0.65);
+            ctx.globalAlpha = fade;
+
+            balloons.forEach(b => {
+                b.x += b.vx;
+                b.bobPhase += 0.025;
+                if (b.x - b.r * 2 > width) b.x = -b.r * 2;
+
+                const bx = b.x;
+                const by = b.y + Math.sin(b.bobPhase) * 6 + cameraY * b.parallax;
+                if (by > height + 60 || by < -60) return;
+
+                // Basket ropes
+                ctx.strokeStyle = '#3D263B';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(bx - b.r * 0.3, by + b.r * 0.85);
+                ctx.lineTo(bx - b.r * 0.2, by + b.r * 1.25);
+                ctx.moveTo(bx + b.r * 0.3, by + b.r * 0.85);
+                ctx.lineTo(bx + b.r * 0.2, by + b.r * 1.25);
+                ctx.stroke();
+
+                // Cozy Wicker Basket
+                ctx.fillStyle = '#D98A4E';
+                ctx.strokeStyle = '#3D263B';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(bx - b.r * 0.26, by + b.r * 1.22, b.r * 0.52, b.r * 0.36, 3);
+                ctx.fill();
+                ctx.stroke();
+
+                // Balloon Envelope (Main Circle + Tapered Base)
+                ctx.fillStyle = b.colors[0];
+                ctx.beginPath();
+                ctx.arc(bx, by, b.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+
+                // Colorful Vertical Stripes on Balloon
+                ctx.fillStyle = b.colors[1];
+                ctx.beginPath();
+                ctx.ellipse(bx, by, b.r * 0.58, b.r, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = b.colors[2];
+                ctx.beginPath();
+                ctx.ellipse(bx, by, b.r * 0.24, b.r, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Outer cartoon ring
+                ctx.strokeStyle = '#3D263B';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(bx, by, b.r, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
+
+        function drawSkyLanterns(intensity) {
+            ctx.save();
+            lanterns.forEach(l => {
+                l.y -= l.vy;
+                l.swayPhase += 0.03;
+                const lx = l.x + Math.sin(l.swayPhase) * 8;
+                if (l.y < -30) l.y = height + 20;
+
+                ctx.globalAlpha = Math.min(1, intensity * 0.9);
+                // Warm Lantern Halo
+                ctx.fillStyle = 'rgba(255, 183, 77, 0.28)';
+                ctx.beginPath();
+                ctx.arc(lx, l.y, l.size * 2.1, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Lantern Body
+                ctx.fillStyle = '#FF9F1C';
+                ctx.strokeStyle = '#3D263B';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(lx - l.size * 0.55, l.y - l.size * 0.75, l.size * 1.1, l.size * 1.5, 4);
+                ctx.fill();
+                ctx.stroke();
+
+                // Inner Core Flame
+                ctx.fillStyle = '#FFF3B0';
+                ctx.beginPath();
+                ctx.arc(lx, l.y + l.size * 0.2, l.size * 0.32, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.restore();
+        }
+
+        function drawFestiveSkylineAndFerrisWheel(sky) {
+            // 1. Back Layer City Buildings
+            skylineBuildings.filter(b => b.layer === 0).forEach(b => {
+                drawSkylineBuilding(b, sky.cityBack, sky.nightFactor, 0.35);
+            });
+
+            // 2. Giant Rotating Ferris Wheel (Bianglala Festival)
+            const fwX = ferrisWheel.x;
+            const fwY = ferrisWheel.y + cameraY * 0.16;
+            const fwR = ferrisWheel.r;
+
+            if (fwY - fwR < height + 80) {
+                ctx.save();
+                // Support A-Frame Legs
+                ctx.strokeStyle = sky.nightFactor > 0.5 ? '#3E437A' : '#4389B0';
+                ctx.lineWidth = 5;
+                ctx.lineCap = 'round';
+                ctx.beginPath();
+                ctx.moveTo(fwX - fwR * 0.55, fwY + fwR * 1.35);
+                ctx.lineTo(fwX, fwY);
+                ctx.lineTo(fwX + fwR * 0.55, fwY + fwR * 1.35);
+                ctx.stroke();
+
+                // Outer Glowing Rim
+                ctx.strokeStyle = sky.nightFactor > 0.3 ? '#FFD166' : '#FFFDF7';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.arc(fwX, fwY, fwR, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#FF70A6';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(fwX, fwY, fwR * 0.82, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Rotating Spokes & Colorful Gondola Cabins
+                const cabinCount = 10;
+                for (let i = 0; i < cabinCount; i++) {
+                    const ang = ferrisWheel.angle + (Math.PI * 2 * i) / cabinCount;
+                    const cx = fwX + Math.cos(ang) * fwR;
+                    const cy = fwY + Math.sin(ang) * fwR;
+
+                    // Spoke
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(fwX, fwY);
+                    ctx.lineTo(cx, cy);
+                    ctx.stroke();
+
+                    // Hanging Gondola Cabin (always upright!)
+                    const cabinColor = FESTIVE_COLORS[i % FESTIVE_COLORS.length];
+                    ctx.fillStyle = cabinColor;
+                    ctx.strokeStyle = '#3D263B';
+                    ctx.lineWidth = 1.8;
+                    ctx.beginPath();
+                    ctx.roundRect(cx - 6, cy + 2, 12, 10, 3);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Lit cabin window at sunset/night
+                    if (sky.nightFactor > 0.25) {
+                        ctx.fillStyle = '#FFF3B0';
+                        ctx.fillRect(cx - 3, cy + 4, 6, 4);
+                    }
+                }
+
+                // Center Hub Star
+                ctx.fillStyle = '#FFD166';
+                ctx.strokeStyle = '#3D263B';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(fwX, fwY, 9, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // 3. Front Layer City Buildings
+            skylineBuildings.filter(b => b.layer === 1).forEach(b => {
+                drawSkylineBuilding(b, sky.cityFront, sky.nightFactor, 0.65);
+            });
+        }
+
+        function drawSkylineBuilding(b, baseColor, nightFactor, windowAlphaScale) {
+            const baseY = GROUND_Y + 95 + cameraY * b.parallax;
+            const topY = baseY - b.h;
+            if (topY > height) return;
+
+            ctx.save();
+            ctx.fillStyle = baseColor;
+            ctx.fillRect(b.x, topY, b.w, b.h + 150);
+
+            // Cute Roof Silhouette
+            if (b.roof === 'gable') {
+                ctx.beginPath();
+                ctx.moveTo(b.x - 3, topY);
+                ctx.lineTo(b.x + b.w * 0.5, topY - 22);
+                ctx.lineTo(b.x + b.w + 3, topY);
+                ctx.closePath();
+                ctx.fill();
+            } else if (b.roof === 'dome') {
+                ctx.beginPath();
+                ctx.arc(b.x + b.w * 0.5, topY, b.w * 0.38, Math.PI, 0);
+                ctx.fill();
+            } else if (b.roof === 'spire') {
+                ctx.fillRect(b.x + b.w * 0.35, topY - 14, b.w * 0.3, 14);
+                ctx.fillRect(b.x + b.w * 0.47, topY - 34, 4, 20);
+            }
+
+            // Glowing City Windows at Sunset/Night
+            if (nightFactor > 0.18) {
+                ctx.fillStyle = `rgba(255, 232, 145, ${nightFactor * windowAlphaScale})`;
+                const padX = 10;
+                const padY = 14;
+                const availW = b.w - padX * 2;
+                const stepX = availW / Math.max(1, b.winCols);
+
+                for (let r = 0; r < b.winRows; r++) {
+                    for (let c = 0; c < b.winCols; c++) {
+                        if ((r + c + b.pastelIdx) % 3 !== 0) {
+                            const wx = b.x + padX + c * stepX + 2;
+                            const wy = topY + padY + r * 26;
+                            if (wy < baseY - 20) {
+                                ctx.fillRect(wx, wy, 7, 11);
+                            }
+                        }
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        /**
+         * Draw Slanted Ground Plaza with Festive Bunting & Lamp Posts
+         */
+        function drawGroundFoundation(nightFactor) {
+            ctx.save();
+
+            const leftY = GROUND_Y + 34;
+            const rightY = GROUND_Y - 12;
+
+            // Main Slanted Ground Fill
+            ctx.fillStyle = nightFactor > 0.6 ? '#263859' : '#B8F1FF';
+            ctx.beginPath();
+            ctx.moveTo(-40, leftY);
+            ctx.lineTo(width + 40, rightY);
+            ctx.lineTo(width + 40, GROUND_Y + 900);
+            ctx.lineTo(-40, GROUND_Y + 900);
+            ctx.closePath();
+            ctx.fill();
+
+            // Bright Cyan/Gold Top Curb Strip (Matching Reference Image)
+            ctx.fillStyle = nightFactor > 0.6 ? '#00BBF9' : '#00D2FF';
+            ctx.beginPath();
+            ctx.moveTo(-40, leftY - 8);
+            ctx.lineTo(width + 40, rightY - 8);
+            ctx.lineTo(width + 40, rightY + 12);
+            ctx.lineTo(-40, leftY + 12);
+            ctx.closePath();
+            ctx.fill();
+
+            // Top Cartoon Outline
+            ctx.strokeStyle = '#3D263B';
+            ctx.lineWidth = 3.5;
+            ctx.beginPath();
+            ctx.moveTo(-40, leftY - 8);
+            ctx.lineTo(width + 40, rightY - 8);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        /**
+         * Draw Vibrant, Detailed Boutique Apartment Block
+         */
+        function drawApartmentBlock(x, y, w, h, rotation, block, nightFactor) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+
+            // Squash & Stretch on landing
+            const scaleY = block.landScaleY || 1;
+            const scaleX = 1 + (1 - scaleY) * 0.48;
+            ctx.scale(scaleX, scaleY);
+
+            const halfW = w * 0.5;
+            const halfH = h * 0.5;
+            const ledgeH = 10;
+            const ledgeOverhang = 5;
+            const outlineColor = '#3D263B';
+            const pal = block.palette || BLOCK_PALETTES[0];
+
+            // 1. Celebratory Glow Halo on Perfect / Milestone
+            if (block.glowIntensity && block.glowIntensity > 0) {
+                ctx.save();
+                ctx.shadowColor = block.isMilestone ? '#FFD166' : '#FF70A6';
+                ctx.shadowBlur = 26 * block.glowIntensity;
+                ctx.strokeStyle = `rgba(255, 224, 102, ${block.glowIntensity * 0.9})`;
+                ctx.lineWidth = 6;
+                ctx.strokeRect(-halfW - 2, -halfH - 2, w + 4, h + 4);
+                ctx.restore();
+            }
+
+            // 2. Main Wall Body
+            const innerH = h - ledgeH * 2;
+            ctx.fillStyle = pal.wall;
+            ctx.fillRect(-halfW, -halfH + ledgeH, w, innerH);
+
+            // Subtle Left & Bottom Shading
+            ctx.fillStyle = pal.shade;
+            ctx.fillRect(-halfW, -halfH + ledgeH, 11, innerH);
+            ctx.fillRect(-halfW, halfH - ledgeH - 6, w, 6);
+
+            // Cozy Brick Texture Dashes
+            ctx.fillStyle = 'rgba(61, 38, 59, 0.16)';
+            ctx.fillRect(halfW - 26, halfH - ledgeH - 18, 10, 3.5);
+            ctx.fillRect(halfW - 14, halfH - ledgeH - 18, 6, 3.5);
+            ctx.fillRect(halfW - 22, halfH - ledgeH - 12, 11, 3.5);
+
+            // 3. Windows, Shutters, Flower Boxes & Balconies
+            drawBlockWindowsAndDecor(halfW, halfH, w, h, ledgeH, block, pal, nightFactor, outlineColor);
+
+            // 4. Striped Cafe Awning (Kanopi Belang)
+            if (block.hasAwning) {
+                const awningY = -halfH + ledgeH;
+                const awningH = 12;
+                const stripes = 6;
+                const stripeW = (w - 8) / stripes;
+                for (let i = 0; i < stripes; i++) {
+                    ctx.fillStyle = i % 2 === 0 ? pal.awning1 : pal.awning2;
+                    ctx.strokeStyle = outlineColor;
+                    ctx.lineWidth = 2;
+                    const sx = -halfW + 4 + i * stripeW;
+                    ctx.beginPath();
+                    ctx.moveTo(sx, awningY);
+                    ctx.lineTo(sx + stripeW, awningY);
+                    ctx.lineTo(sx + stripeW, awningY + awningH - 3);
+                    ctx.arc(sx + stripeW * 0.5, awningY + awningH - 3, stripeW * 0.5, 0, Math.PI);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+
+            // 5. Festive Bunting Flags (Bendera Segitiga Meriah)
+            if (block.hasBunting && !block.hasAwning) {
+                const buntY = -halfH + ledgeH + 2;
+                const flags = 5;
+                const flagW = (w - 12) / flags;
+                for (let i = 0; i < flags; i++) {
+                    ctx.fillStyle = FESTIVE_COLORS[(block.index + i) % FESTIVE_COLORS.length];
+                    ctx.strokeStyle = outlineColor;
+                    ctx.lineWidth = 1.8;
+                    const fx = -halfW + 6 + i * flagW;
+                    ctx.beginPath();
+                    ctx.moveTo(fx, buntY);
+                    ctx.lineTo(fx + flagW, buntY);
+                    ctx.lineTo(fx + flagW * 0.5, buntY + 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+
+            // 6. Warm Glowing String Fairy Lights at Dusk/Night
+            if (block.hasFairyLights) {
+                const lightY = halfH - ledgeH - 8;
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 1.2;
+                ctx.beginPath();
+                ctx.moveTo(-halfW + 6, lightY - 2);
+                ctx.quadraticCurveTo(0, lightY + 4, halfW - 6, lightY - 2);
+                ctx.stroke();
+
+                for (let i = -2; i <= 2; i++) {
+                    const lx = i * (w * 0.18);
+                    const ly = lightY + (4 - Math.abs(i) * 1.2) - 1;
+                    ctx.fillStyle = nightFactor > 0.2 ? '#FFE066' : '#FFFDF7';
+                    ctx.beginPath();
+                    ctx.arc(lx, ly, 2.6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 7. Wall Outline
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-halfW, -halfH + ledgeH, w, innerH);
+
+            // 8. Top & Bottom Ledges (Classic Reference Overhangs)
+            drawLedge(-halfW - ledgeOverhang, -halfH, w + ledgeOverhang * 2, ledgeH, pal, outlineColor);
+            drawLedge(-halfW - ledgeOverhang, halfH - ledgeH, w + ledgeOverhang * 2, ledgeH, pal, outlineColor);
+
+            // 9. Golden Penthouse Crown Badge on Milestone Floors (Every 5 Floors)
+            if (block.isMilestone) {
+                ctx.fillStyle = '#FF595E';
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                ctx.roundRect(-18, -halfH - 8, 36, 12, 4);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#FFD166';
+                ctx.font = '800 9px "Fredoka", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`★ ${block.index} ★`, 0, -halfH + 1);
+            }
+
+            ctx.restore();
+        }
+
+        function drawBlockWindowsAndDecor(halfW, halfH, w, h, ledgeH, block, pal, nightFactor, outlineColor) {
+            const wy = -8;
+            const winH = 24;
+
+            if (block.windowLayout === 'panoramic') {
+                // Wide Golden Penthouse Window
+                drawSingleWindow(-halfW + 16, wy, w - 32, winH + 2, pal.shutter, nightFactor, outlineColor, false);
+            } else if (block.windowLayout === 'double_cafe') {
+                drawSingleWindow(-halfW + 16, wy, 22, winH, pal.shutter, nightFactor, outlineColor, true);
+                drawSingleWindow(halfW - 38, wy, 22, winH, pal.shutter, nightFactor, outlineColor, true);
+            } else if (block.windowLayout === 'arched_boutique') {
+                drawSingleWindow(-13, wy - 2, 26, winH + 4, pal.shutter, nightFactor, outlineColor, true);
+            } else if (block.windowLayout === 'balcony_suite') {
+                drawSingleWindow(-halfW + 18, wy - 2, 24, winH + 4, pal.shutter, nightFactor, outlineColor, false);
+                // Cute Balcony Railing
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2.2;
+                ctx.strokeRect(-halfW + 14, wy + 12, 32, 11);
+                for (let bx = -halfW + 20; bx <= -halfW + 40; bx += 6) {
+                    ctx.beginPath();
+                    ctx.moveTo(bx, wy + 12);
+                    ctx.lineTo(bx, wy + 23);
+                    ctx.stroke();
+                }
+            } else {
+                // Classic Cozy Left Window (Matching Reference Image)
+                drawSingleWindow(-halfW + 18, wy, 24, winH, pal.shutter, nightFactor, outlineColor, true);
+            }
+
+            // Cute Flower Box under Window
+            if (block.hasFlowerBox && block.windowLayout !== 'balcony_suite') {
+                const fx = block.windowLayout === 'arched_boutique' ? -15 : -halfW + 16;
+                const fy = wy + winH - 2;
+                ctx.fillStyle = '#D97742';
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2;
+                ctx.fillRect(fx, fy, 28, 7);
+                ctx.strokeRect(fx, fy, 28, 7);
+
+                // Colorful Little Flower Blossoms
+                for (let i = 0; i < 3; i++) {
+                    ctx.fillStyle = block.flowerColors[i];
+                    ctx.beginPath();
+                    ctx.arc(fx + 6 + i * 8, fy - 2, 3.8, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function drawSingleWindow(wx, wy, ww, wh, shutterColor, nightFactor, outlineColor, hasShutters) {
+            // Optional Side Shutters
+            if (hasShutters) {
+                ctx.fillStyle = shutterColor;
+                ctx.strokeStyle = outlineColor;
+                ctx.lineWidth = 2;
+                ctx.fillRect(wx - 5, wy + 1, 5, wh - 2);
+                ctx.strokeRect(wx - 5, wy + 1, 5, wh - 2);
+                ctx.fillRect(wx + ww, wy + 1, 5, wh - 2);
+                ctx.strokeRect(wx + ww, wy + 1, 5, wh - 2);
+            }
+
+            // Window Glass (Sky Blue by day -> Warm Cozy Gold at dusk/night)
+            ctx.fillStyle = nightFactor > 0.35 ? '#FFE169' : '#68D8F8';
+            ctx.fillRect(wx, wy, ww, wh);
+
+            // Diagonal Gloss Reflection Streaks
+            ctx.fillStyle = nightFactor > 0.35 ? '#FFF8D6' : '#C4F3FF';
+            ctx.beginPath();
+            ctx.moveTo(wx + 3, wy + wh - 3);
+            ctx.lineTo(wx + ww - 5, wy + 3);
+            ctx.lineTo(wx + ww - 2, wy + 3);
+            ctx.lineTo(wx + 8, wy + wh - 3);
+            ctx.closePath();
+            ctx.fill();
+
+            // Window Frame
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = 2.6;
+            ctx.strokeRect(wx, wy, ww, wh);
+        }
+
+        function drawLedge(x, y, w, h, pal, outlineColor) {
+            ctx.fillStyle = pal.ledge;
+            ctx.fillRect(x, y, w, h);
+
+            ctx.fillStyle = pal.ledgeShade;
+            ctx.fillRect(x, y, 14, h);
+            ctx.fillRect(x + w - 12, y, 12, h);
+
+            ctx.strokeStyle = outlineColor;
+            ctx.lineWidth = 2.8;
+            ctx.strokeRect(x, y, w, h);
+        }
+
+        /**
+         * Draw Braided Rope, Festive Pulley Box & Swinging Block at Top
+         */
+        function drawCraneAndSwingingBlock(nightFactor) {
+            const hookPos = getCraneHookPosition();
+
+            ctx.save();
+            ctx.translate(crane.pivotX, crane.pivotY);
+            ctx.rotate(-crane.angle);
+
+            const ropeW = 12;
+            const ropeLen = crane.ropeLength;
+
+            // 1. Braided Rope Body
+            ctx.fillStyle = '#D7A15C';
+            ctx.strokeStyle = '#3D263B';
+            ctx.lineWidth = 2.6;
+            ctx.fillRect(-ropeW * 0.5, 0, ropeW, ropeLen);
+            ctx.strokeRect(-ropeW * 0.5, 0, ropeW, ropeLen);
+
+            // Diagonal Braid Hatching
+            ctx.strokeStyle = '#9E6B2E';
+            ctx.lineWidth = 2.2;
+            for (let ry = 8; ry < ropeLen - 6; ry += 10) {
+                ctx.beginPath();
+                ctx.moveTo(-ropeW * 0.5 + 1, ry);
+                ctx.lineTo(ropeW * 0.5 - 1, ry + 6);
+                ctx.stroke();
+            }
+
+            // 2. Connector Stem
+            ctx.fillStyle = '#FF9F1C';
+            ctx.strokeStyle = '#3D263B';
+            ctx.lineWidth = 2.6;
+            ctx.fillRect(-4, ropeLen + 14, 8, 12);
+            ctx.strokeRect(-4, ropeLen + 14, 8, 12);
+
+            // 3. Yellow-Orange Crane Pulley Block (From Reference Image + Festive Polish)
+            const boxW = 36;
+            const boxH = 34;
+            const boxY = ropeLen - 12;
+
+            ctx.fillStyle = '#FFB703';
+            ctx.fillRect(-boxW * 0.5, boxY, boxW, boxH);
+
+            ctx.fillStyle = '#FB8500';
+            ctx.fillRect(-boxW * 0.5, boxY + boxH - 8, boxW, 8);
+            ctx.fillRect(-boxW * 0.5, boxY, 6, boxH);
+
+            ctx.strokeStyle = '#3D263B';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-boxW * 0.5, boxY, boxW, boxH);
+
+            // Cute Center Star Rivet on Pulley
+            ctx.fillStyle = '#FFF3B0';
+            ctx.beginPath();
+            ctx.arc(0, boxY + boxH * 0.5, 4.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.restore();
+
+            // 4. Draw Active Swinging Block Attached to Crane
+            if (activeBlock && activeBlock.state === 'SWINGING') {
+                const screenX = hookPos.x;
+                const screenY = hookPos.y + 18 + BLOCK_H * 0.5;
+                drawApartmentBlock(
+                    screenX,
+                    screenY,
+                    activeBlock.w,
+                    activeBlock.h,
+                    -crane.angle * 0.65,
+                    activeBlock,
+                    nightFactor
+                );
+            }
+        }
+
+        /**
+         * ============================================================================
+         * 7. UI UPDATES & EVENT LISTENERS
+         * ============================================================================
+         */
+        function updateHUD() {
+            floorDisplay.textContent = floors;
+            scoreDisplay.textContent = score;
+            bestDisplay.textContent = bestScore;
+            if (heightPill) {
+                heightPill.textContent = `🏗️ ${floors * 3}m`;
+            }
+
+            // Combo Multiplier Badge
+            if (combo >= 2) {
+                comboBadge.classList.remove('hidden');
+                comboBadge.textContent = `🔥 COMBO x${combo}`;
+            } else {
+                comboBadge.classList.add('hidden');
+            }
+
+            // Lives Display
+            const hearts = [
+                document.getElementById('heart-1'),
+                document.getElementById('heart-2'),
+                document.getElementById('heart-3')
+            ];
+
+            if (isZenMode) {
+                hearts[0].textContent = '✨';
+                hearts[1].textContent = '∞';
+                hearts[2].textContent = '✨';
+                hearts.forEach(h => h.style.opacity = '1');
+            } else {
+                hearts.forEach((h, i) => {
+                    h.textContent = '❤️';
+                    h.style.opacity = i < lives ? '1' : '0.22';
+                    h.style.transform = i < lives ? 'scale(1)' : 'scale(0.8)';
+                });
+            }
+        }
+
+        function startGame() {
+            audio.init();
+            audio.startBgm();
+            resetGame();
+            gameState = 'PLAYING';
+            startOverlay.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => startOverlay.classList.add('hidden'), 300);
+            gameoverOverlay.classList.add('hidden');
+        }
+
+        function triggerGameOver() {
+            gameState = 'GAMEOVER';
+            finalScoreEl.textContent = score;
+            finalBestScoreEl.textContent = bestScore;
+            finalFloorsEl.textContent = floors;
+            finalMaxComboEl.textContent = `x${maxCombo}`;
+            gameoverOverlay.classList.remove('hidden');
+            spawnBackgroundFirework(width * 0.3, height * 0.3);
+            spawnBackgroundFirework(width * 0.7, height * 0.28);
+        }
+
+        // Canvas Tap / Click Handler
+        canvas.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            if (gameState === 'PLAYING') {
+                dropActiveBlock();
+            }
+        });
+
+        // Spacebar / ArrowDown / Enter Support
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.code === 'ArrowDown' || e.code === 'Enter') {
+                e.preventDefault();
+                if (gameState === 'START') {
+                    startGame();
+                } else if (gameState === 'PLAYING') {
+                    dropActiveBlock();
+                } else if (gameState === 'GAMEOVER') {
+                    startGame();
+                }
+            }
+        });
+
+        // Buttons
+        document.getElementById('btn-start-game').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+
+        document.getElementById('btn-restart').addEventListener('click', (e) => {
+            e.stopPropagation();
+            startGame();
+        });
+
+        document.getElementById('btn-switch-zen').addEventListener('click', (e) => {
+            e.stopPropagation();
+            isZenMode = true;
+            zenToggleBtn.textContent = '✨ ZEN MODE: ON';
+            showToast('✨ Zen Mode: Unlimited Lives Enabled');
+            startGame();
+        });
+
+        audioBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const muted = audio.toggleMute();
+            audioIcon.textContent = muted ? '🔇' : '🔊';
+            audioBtn.title = muted ? 'Sound Off' : 'Sound On';
+            showToast(muted ? '🔇 Sound Off' : '🔊 Sound On');
+        });
+
+        document.getElementById('btn-mood').addEventListener('click', (e) => {
+            e.stopPropagation();
+            audio.init();
+            audio.playKalimbaNote(659.25, 0.06);
+            currentMoodIndex = (currentMoodIndex + 1) % MOODS.length;
+            const mood = MOODS[currentMoodIndex];
+            moodIcon.textContent = mood.icon;
+            moodLabel.textContent = mood.name;
+            showToast(`Sky Theme: ${mood.name}`);
+        });
+
+        zenToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            audio.init();
+            audio.playKalimbaNote(587.33, 0.06);
+            isZenMode = !isZenMode;
+            zenToggleBtn.textContent = isZenMode ? '✨ ZEN MODE: ON' : '✨ ZEN MODE: OFF';
+            showToast(isZenMode ? '✨ Zen Mode: ON (Unlimited Lives)' : '❤️ Classic Mode: 3 Lives');
+            updateHUD();
+        });
+
+        window.addEventListener('resize', resizeCanvas);
+
+        /**
+         * ============================================================================
+         * 8. MAIN ANIMATION LOOP
+         * ============================================================================
+         */
+        function gameLoop() {
+            updatePhysics();
+            drawScene();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            resizeCanvas();
+            resetGame();
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
